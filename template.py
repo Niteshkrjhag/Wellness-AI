@@ -12,10 +12,12 @@ logging.basicConfig(
 list_of_files = [
     "src/__init__.py",
     "src/helper.py",
+    "src/prompt.py",
     ".env",
     "setup.py",             # Used for packaging the project
     "app.py",
     "research/trails.ipynb" # Jupyter notebook for experiments
+
 ]
 
 # Loop through each path in the list
