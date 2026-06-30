@@ -11,4 +11,5 @@ langchain_experimental
 langchain_text_splitters
 langchain-huggingface
 sentence-transformers
+langchain-ollama
 -e .
