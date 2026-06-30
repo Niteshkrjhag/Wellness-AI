@@ -1,68 +1,148 @@
-<section>
-  <div class="container py-5">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wellness AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    // Set theme immediately to avoid flash of unstyled content
+    (function() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      } else {
+        // Adapt to browser setting, defaulting to dark if light is not explicitly preferred
+        const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        document.documentElement.setAttribute('data-theme', prefersLight ? 'light' : 'dark');
+      }
+    })();
+  </script>
+</head>
+<body>
 
-    <div class="row d-flex justify-content-center">
-      <div class="col-md-8 col-lg-6 col-xl-4">
+  <header>
+    <div class="brand">Wellness AI</div>
+    <button id="theme-toggle" title="Toggle Theme">
+      <svg id="theme-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Default icon will be set by JS -->
+      </svg>
+    </button>
+  </header>
 
-        <div class="card" id="chat1" style="border-radius: 15px;">
-          <div
-            class="card-header d-flex justify-content-between align-items-center p-3 bg-info text-white border-bottom-0"
-            style="border-top-left-radius: 15px; border-top-right-radius: 15px;">
-            <i class="fas fa-angle-left"></i>
-            <p class="mb-0 fw-bold">Wellness-AI</p>
-            <i class="fas fa-times"></i>
-          </div>
-          <div class="card-body">
-
-            <div class="d-flex flex-row justify-content-start mb-4">
-              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
-                alt="avatar 1" style="width: 45px; height: 100%;">
-              <div class="p-3 ms-3" style="border-radius: 15px; background-color: rgba(57, 192, 237,.2);">
-                <p class="small mb-0">Hello and thank you for visiting MDBootstrap. Please click the video
-                  below.</p>
-              </div>
-            </div>
-
-            <div class="d-flex flex-row justify-content-end mb-4">
-              <div class="p-3 me-3 border bg-body-tertiary" style="border-radius: 15px;">
-                <p class="small mb-0">Thank you, I really like your product.</p>
-              </div>
-              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava2-bg.webp"
-                alt="avatar 1" style="width: 45px; height: 100%;">
-            </div>
-
-            <div class="d-flex flex-row justify-content-start mb-4">
-              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
-                alt="avatar 1" style="width: 45px; height: 100%;">
-              <div class="ms-3" style="border-radius: 15px;">
-                <div class="bg-image">
-                  <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/screenshot1.webp"
-                    style="border-radius: 15px;" alt="video">
-                  <a href="#!">
-                    <div class="mask"></div>
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <div class="d-flex flex-row justify-content-start mb-4">
-              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
-                alt="avatar 1" style="width: 45px; height: 100%;">
-              <div class="p-3 ms-3" style="border-radius: 15px; background-color: rgba(57, 192, 237,.2);">
-                <p class="small mb-0">...</p>
-              </div>
-            </div>
-
-            <div data-mdb-input-init class="form-outline">
-              <textarea class="form-control bg-body-tertiary" id="textAreaExample" rows="4"></textarea>
-              <label class="form-label" for="textAreaExample">Type your message</label>
-            </div>
-
-          </div>
-        </div>
-
+  <main id="chat-container">
+    <div class="messages-wrapper" id="messages-wrapper">
+      <div class="message ai">
+        Hello. I'm your Wellness AI. How can I help you achieve balance today?
       </div>
     </div>
+    
+    <div class="typing-indicator" id="typing-indicator">
+      <span></span><span></span><span></span>
+    </div>
+  </main>
 
+  <div class="input-area">
+    <div class="input-container">
+      <form id="chat-form">
+        <input type="text" id="chat-input" placeholder="Type your message..." autocomplete="off" required>
+        <button type="submit" id="send-btn" disabled>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </form>
+    </div>
   </div>
-</section>
+
+  <script>
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const messagesWrapper = document.getElementById('messages-wrapper');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const chatContainer = document.getElementById('chat-container');
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+
+    // Theme Management
+    const updateThemeIcon = () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        themeIcon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+      } else {
+        themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+      }
+    };
+
+    updateThemeIcon();
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon();
+    });
+
+    // Chat Functionality
+    input.addEventListener('input', () => {
+      sendBtn.disabled = input.value.trim() === '';
+    });
+
+    function addMessage(text, sender) {
+      const msgDiv = document.createElement('div');
+      msgDiv.classList.add('message', sender);
+      
+      if (sender === 'ai') {
+        msgDiv.innerHTML = marked.parse(text);
+      } else {
+        msgDiv.textContent = text;
+      }
+      
+      messagesWrapper.appendChild(msgDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = input.value.trim();
+      if (!message) return;
+
+      // Add user message
+      addMessage(message, 'user');
+      input.value = '';
+      sendBtn.disabled = true;
+
+      // Show typing indicator
+      typingIndicator.classList.add('active');
+      messagesWrapper.appendChild(typingIndicator);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      try {
+        const formData = new FormData();
+        formData.append('msg', message);
+
+        const response = await fetch('/get', {
+          method: 'POST',
+          body: formData
+        });
+
+        const text = await response.text();
+        
+        typingIndicator.classList.remove('active');
+        addMessage(text, 'ai');
+      } catch (error) {
+        typingIndicator.classList.remove('active');
+        addMessage('Sorry, something went wrong. Please try again.', 'ai');
+        console.error('Error:', error);
+      }
+    });
+  </script>
+</body>
+</html>
